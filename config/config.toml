@@ -1,0 +1,13 @@
+# Harness AI Agent Runtime Configuration (Phase 0 Placeholder)
+
+[runtime]
+# Environment name (e.g. development, production)
+environment = "development"
+
+[log]
+# Logging level (e.g. debug, info, warn, error)
+level = "info"
+
+[profiles]
+# Default active profile name
+active = "default"

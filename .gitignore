@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Configuration & Runtime State
+config/profiles/*
+!config/profiles/.gitkeep
+config/installed/*
+!config/installed/.gitkeep
+
+# Environment & Logs
+.env
+.env.local
+*.log
+
+# System files
+.DS_Store

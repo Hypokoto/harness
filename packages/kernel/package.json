@@ -1,0 +1,15 @@
+{
+  "name": "@harness/kernel",
+  "version": "0.0.0-phase0",
+  "description": "Kernel package - Plugin lifecycle, service registry, dependency injection",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "tsc -b --clean"
+  }
+}

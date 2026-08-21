@@ -1,0 +1,15 @@
+{
+  "name": "@harness/agent",
+  "version": "0.0.0-phase0",
+  "description": "Agent package - AgentLoop, Session",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "tsc -b --clean"
+  }
+}
