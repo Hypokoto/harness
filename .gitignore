@@ -19,3 +19,7 @@ config/installed/*
 
 # System files
 .DS_Store
+
+
+.claude/
+CLAUDE.md

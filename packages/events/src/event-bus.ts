@@ -1,4 +1,5 @@
-import type { Event, EventListener } from './types.js';
+import { EventBusError } from './errors.js';
+import type { EventEnvelope, EventListener } from './types.js';
 
 export class EventBus {
   private readonly listeners = new Map<string, Set<EventListener<any>>>();
@@ -37,7 +38,7 @@ export class EventBus {
    * Returns an unsubscribe function.
    */
   once<T = unknown>(type: string, listener: EventListener<T>): () => void {
-    const wrapper: EventListener<T> = async (event: Event<T>) => {
+    const wrapper: EventListener<T> = async (event: EventEnvelope<T>) => {
       this.off(type, wrapper);
       await listener(event);
     };
@@ -74,7 +75,7 @@ export class EventBus {
    */
   listenerCount(type?: string): number {
     if (type !== undefined) {
-      return (this.listeners.get(type)?.size ?? 0);
+      return this.listeners.get(type)?.size ?? 0;
     }
     let total = this.wildcardListeners.size;
     for (const set of this.listeners.values()) {
@@ -84,12 +85,16 @@ export class EventBus {
   }
 
   /**
-   * Emit an event to all matching listeners and wildcard listeners.
+   * Emit an event envelope to all matching type listeners and wildcard listeners.
+   * Execution is sequential async. Exceptions in listeners are propagated.
    */
-  async emit<T = unknown>(event: Event<T>): Promise<void> {
+  async emit<T = unknown>(event: EventEnvelope<T>): Promise<void> {
+    if (!event || typeof event.type !== 'string') {
+      throw new EventBusError('Event emit requires a valid EventEnvelope with a type string');
+    }
+
     const typeListeners = Array.from(this.listeners.get(event.type) ?? []);
     const wildcards = Array.from(this.wildcardListeners);
-
     const allListeners = [...typeListeners, ...wildcards];
 
     for (const listener of allListeners) {
