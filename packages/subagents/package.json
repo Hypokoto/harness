@@ -1,0 +1,18 @@
+{
+  "name": "@harness/subagents",
+  "version": "0.0.0-phase13",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@harness/model": "workspace:*",
+    "@harness/tools": "workspace:*",
+    "@harness/context": "workspace:*",
+    "@harness/events": "workspace:*",
+    "@harness/agent": "workspace:*"
+  }
+}

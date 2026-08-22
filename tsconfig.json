@@ -35,7 +35,9 @@
     { "path": "./packages/mcp" },
     { "path": "./packages/registry-client" },
     { "path": "./packages/skills" },
-    { "path": "./packages/memory" }
+    { "path": "./packages/memory" },
+    { "path": "./packages/subagents" },
+    { "path": "./packages/sandbox" }
   ],
   "files": []
 }

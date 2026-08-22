@@ -5,6 +5,11 @@ export interface RegistryIndex {
   }>;
 }
 
+export interface PackageSignature {
+  keyId: string;
+  signature: string;
+}
+
 export interface PackageManifest {
   name: string;
   version: string;
@@ -21,6 +26,7 @@ export interface PackageManifest {
     command: string;
     args?: string[];
   };
+  signatures?: PackageSignature[];
 }
 
 export interface LockfilePackage {
@@ -31,6 +37,10 @@ export interface LockfilePackage {
   installedPath: string;
   requestedCapabilities?: string[];
   type: string;
+  signature?: {
+    keyId: string;
+    verified: boolean;
+  };
 }
 
 export interface Lockfile {

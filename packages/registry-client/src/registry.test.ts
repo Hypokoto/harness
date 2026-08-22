@@ -13,46 +13,46 @@ const INSTALL_DIR = path.join(REPO_ROOT, 'config', 'installed');
 const LOCKFILE_PATH = path.join(INSTALL_DIR, 'lock.json');
 
 test('TEST 1: Registry index loads', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   const index = await client.fetchIndex();
   assert.ok(index.packages['test-mcp']);
 });
 
 test('TEST 2: Invalid index is rejected', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL + '/invalid-does-not-exist');
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL + '/invalid-does-not-exist' });
   await assert.rejects(async () => client.fetchIndex());
 });
 
 test('TEST 3: Package resolution works & TEST 5: Exact version resolution works', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   const v = await client.resolvePackage('test-mcp', '1.0.0');
   assert.strictEqual(v, '1.0.0');
 });
 
 test('TEST 4: Unknown package fails', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   await assert.rejects(async () => client.resolvePackage('unknown-pkg'));
 });
 
 test('TEST 6: Semver resolution works', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   const v = await client.resolvePackage('test-mcp', '^1.0.0');
   assert.strictEqual(v, '1.0.0');
 });
 
 test('TEST 7: Manifest loads', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   const manifest = await client.fetchManifest('test-mcp', '1.0.0');
   assert.strictEqual(manifest.name, 'test-mcp');
 });
 
 test('TEST 8: Invalid manifest fails & TEST 9: Manifest/package identity mismatch fails & TEST 10: Manifest/version mismatch fails', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   await assert.rejects(async () => client.fetchManifest('test-mcp', '9.9.9'));
 });
 
 test('TEST 11: Artifact downloads & TEST 12: Correct checksum passes & TEST 15: Package installs into config/installed', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   const manifest = await client.fetchManifest('test-mcp', '1.0.0');
   const buffer = await client.fetchArtifact(manifest.artifact.url);
   
@@ -68,7 +68,7 @@ test('TEST 11: Artifact downloads & TEST 12: Correct checksum passes & TEST 15: 
 });
 
 test('TEST 13: Incorrect checksum fails', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   const manifest = await client.fetchManifest('test-mcp', '1.0.0');
   const buffer = Buffer.from('bad data');
   
@@ -84,7 +84,7 @@ test('TEST 22: Lockfile is created & TEST 23, 24, 25: Lockfile contains correct 
   const lock = new LockfileManager(LOCKFILE_PATH);
   await lock.write({ schemaVersion: 1, packages: {} });
   
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   const manifest = await client.fetchManifest('test-mcp', '1.0.0');
   const buffer = await client.fetchArtifact(manifest.artifact.url);
   
@@ -101,7 +101,7 @@ test('TEST 22: Lockfile is created & TEST 23, 24, 25: Lockfile contains correct 
 });
 
 test('TEST 21: Duplicate installation is handled deterministically', async () => {
-  const client = new RegistryClient(TEST_REGISTRY_URL);
+  const client = new RegistryClient({ registryUrl: TEST_REGISTRY_URL });
   const manifest = await client.fetchManifest('test-mcp', '1.0.0');
   const buffer = await client.fetchArtifact(manifest.artifact.url);
   const installer = new Installer({ installDir: INSTALL_DIR });

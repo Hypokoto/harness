@@ -2,9 +2,24 @@ import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import semver from 'semver';
 import type { RegistryIndex, PackageManifest, ResolveResult } from './types.js';
+import { verifyManifestSignature, type TrustStore } from './trust.js';
+
+export interface RegistryClientOptions {
+  registryUrl: string;
+  cacheDir?: string;
+  trustStore?: TrustStore;
+}
 
 export class RegistryClient {
-  constructor(private readonly baseUrl: string) {}
+  private registryUrl: string;
+  private cacheDir: string | undefined;
+  private trustStore?: TrustStore;
+
+  constructor(options: RegistryClientOptions) {
+    this.registryUrl = options.registryUrl.replace(/\/$/, '');
+    this.cacheDir = options.cacheDir;
+    this.trustStore = options.trustStore;
+  }
 
   private async fetchText(url: string): Promise<string> {
     if (url.startsWith('file://')) {
@@ -27,7 +42,7 @@ export class RegistryClient {
   }
 
   async fetchIndex(): Promise<RegistryIndex> {
-    const text = await this.fetchText(`${this.baseUrl}/index.json`);
+    const text = await this.fetchText(`${this.registryUrl}/index.json`);
     const index = JSON.parse(text) as RegistryIndex;
     if (!index || !index.schemaVersion || !index.packages) {
       throw new Error('Invalid registry index schema');
@@ -71,7 +86,7 @@ export class RegistryClient {
       throw new Error('Invalid package name or version');
     }
 
-    const url = `${this.baseUrl}/packages/${name}/${version}/manifest.json`;
+    const url = `${this.registryUrl}/packages/${name}/${version}/manifest.json`;
     const text = await this.fetchText(url);
     const manifest = JSON.parse(text) as PackageManifest;
 
@@ -89,6 +104,11 @@ export class RegistryClient {
       throw new Error(`Unsupported package type: ${manifest.type}`);
     }
 
+    if (this.trustStore) {
+      const sigResult = verifyManifestSignature(manifest, this.trustStore);
+      (manifest as any)._verifiedKeyId = sigResult.keyId;
+    }
+
     return manifest;
   }
 
@@ -96,7 +116,7 @@ export class RegistryClient {
     // Determine absolute URL if relative
     const artifactUrl = url.startsWith('http') || url.startsWith('file://') 
       ? url 
-      : `${this.baseUrl}/${url}`;
+      : `${this.registryUrl}/${url}`;
 
     return this.fetchBuffer(artifactUrl);
   }

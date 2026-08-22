@@ -144,11 +144,31 @@ importers:
         specifier: ^5.5.0
         version: 5.9.3
 
+  packages/sandbox: {}
+
   packages/skills:
     dependencies:
       '@harness/context':
         specifier: workspace:*
         version: link:../context
+      '@harness/model':
+        specifier: workspace:*
+        version: link:../model
+      '@harness/tools':
+        specifier: workspace:*
+        version: link:../tools
+
+  packages/subagents:
+    dependencies:
+      '@harness/agent':
+        specifier: workspace:*
+        version: link:../agent
+      '@harness/context':
+        specifier: workspace:*
+        version: link:../context
+      '@harness/events':
+        specifier: workspace:*
+        version: link:../events
       '@harness/model':
         specifier: workspace:*
         version: link:../model

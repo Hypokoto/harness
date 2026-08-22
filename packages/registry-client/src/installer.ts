@@ -87,7 +87,7 @@ export class Installer {
     await fs.mkdir(path.dirname(finalDir), { recursive: true });
     await fs.rename(stagingDir, finalDir);
 
-    return {
+    const lockPkg: LockfilePackage = {
       name: manifest.name,
       version: manifest.version,
       checksum: hash,
@@ -96,5 +96,19 @@ export class Installer {
       requestedCapabilities: manifest.capabilities || [],
       type: manifest.type
     };
+
+    if ((manifest as any)._verifiedKeyId) {
+      lockPkg.signature = {
+        keyId: (manifest as any)._verifiedKeyId,
+        verified: true
+      };
+    } else if (manifest.signatures && manifest.signatures.length > 0) {
+      lockPkg.signature = {
+        keyId: manifest.signatures[0].keyId,
+        verified: false
+      };
+    }
+
+    return lockPkg;
   }
 }
