@@ -1,5 +1,4 @@
-/**
- * @harness/registry-client
- * Phase 0 boundary placeholder.
- */
-export {};
+export * from './types.js';
+export * from './client.js';
+export * from './installer.js';
+export * from './lockfile.js';

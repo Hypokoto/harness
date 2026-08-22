@@ -1,0 +1,16 @@
+{
+  "name": "test-mcp",
+  "version": "1.0.0",
+  "type": "mcp",
+  "description": "Test MCP Package",
+  "artifact": {
+    "type": "tarball",
+    "url": "packages/test-mcp/1.0.0/archive.tar.gz"
+  },
+  "checksum": "35fb353f98bc219b7597e1184ff2c14eaa7d3b82291722d084d32c9c41e073f1",
+  "capabilities": ["test.capability"],
+  "mcp": {
+    "command": "node",
+    "args": ["test-server.js"]
+  }
+}

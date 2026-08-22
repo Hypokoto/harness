@@ -1,7 +1,6 @@
 {
   "name": "@harness/registry-client",
-  "version": "0.0.0-phase0",
-  "description": "Registry-Client package - Registry communication, install/update/resolve",
+  "version": "0.0.0-phase10",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -10,6 +9,19 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "tsc -b --clean"
+    "clean": "tsc -b --clean",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@harness/permissions": "workspace:*",
+    "semver": "^7.6.3",
+    "tar": "^7.5.22"
+  },
+  "devDependencies": {
+    "@harness/mcp": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/semver": "^7.5.8",
+    "@types/tar": "^7.0.87",
+    "typescript": "^5.5.0"
   }
 }

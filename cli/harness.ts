@@ -1,17 +1,23 @@
 #!/usr/bin/env node
 /**
  * Harness CLI Entrypoint Placeholder
- * Phase 0 scaffolding — no commands implemented.
+ * Phase 0 scaffolding — Phase 10 install implemented.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const args = process.argv.slice(2);
+// Using dynamic imports for modules that might not be built in earlier phases,
+// or we just import them and rely on tsx. Since it's Phase 10, these exist.
+import { RegistryClient, Installer, LockfileManager } from '../packages/registry-client/dist/index.js';
+import { McpServerManager } from '../packages/mcp/dist/index.js';
 
-if (args[0] === 'mcp' && args[1] === 'list') {
-  const configPath = path.join(process.cwd(), 'config', 'mcp.json');
+const args = process.argv.slice(2);
+const cwd = process.cwd();
+
+async function runMcpList() {
+  const configPath = path.join(cwd, 'config', 'mcp.json');
   if (fs.existsSync(configPath)) {
     console.log("Configured MCP Servers:");
     try {
@@ -25,7 +31,134 @@ if (args[0] === 'mcp' && args[1] === 'list') {
   } else {
     console.log("No MCP servers configured locally (config/mcp.json missing).");
   }
-  process.exit(0);
 }
 
-console.log("Phase 0 scaffolding — no commands implemented.");
+async function runInstall(pkgRef: string) {
+  let name = pkgRef;
+  let requestedVersion: string | undefined = undefined;
+  
+  if (pkgRef.includes('@')) {
+    const parts = pkgRef.split('@');
+    name = parts[0];
+    requestedVersion = parts[1];
+  }
+
+  // Determine registry URL
+  let registryUrl = 'file://' + path.join(cwd, 'test-fixtures', 'registry'); // Default for tests
+  const configTomlPath = path.join(cwd, 'config', 'config.toml');
+  if (fs.existsSync(configTomlPath)) {
+    const toml = fs.readFileSync(configTomlPath, 'utf8');
+    const match = toml.match(/url\s*=\s*"([^"]+)"/);
+    if (match) {
+      registryUrl = match[1];
+    }
+  }
+
+  const client = new RegistryClient(registryUrl);
+  const installDir = path.join(cwd, 'config', 'installed');
+  const lockfilePath = path.join(installDir, 'lock.json');
+  
+  const installer = new Installer({ installDir });
+  const lockfileManager = new LockfileManager(lockfilePath);
+
+  try {
+    console.log(`Resolving package...`);
+    const resolvedVersion = await client.resolvePackage(name, requestedVersion);
+    console.log(`Resolved version ${resolvedVersion}`);
+
+    // Check if already installed
+    const existing = await lockfileManager.getPackage(name);
+    if (existing && existing.version === resolvedVersion) {
+      console.log(`${name}@${resolvedVersion} is already installed.`);
+      process.exit(0);
+    }
+
+    console.log(`Fetching manifest...`);
+    const manifest = await client.fetchManifest(name, resolvedVersion);
+
+    console.log(`Fetching artifact...`);
+    const artifactBuffer = await client.fetchArtifact(manifest.artifact.url);
+
+    console.log(`Verifying checksum and installing...`);
+    const lockPackage = await installer.install(manifest, artifactBuffer, registryUrl);
+
+    await lockfileManager.addPackage(lockPackage);
+
+    console.log(`Capabilities requested:`);
+    for (const cap of lockPackage.requestedCapabilities || []) {
+      console.log(`- ${cap}`);
+    }
+
+    console.log(`\nInstalled successfully.`);
+  } catch (err: any) {
+    console.error(`Installation failed: ${err.message}`);
+    process.exit(1);
+  }
+}
+
+async function run() {
+  if (args[0] === 'mcp' && args[1] === 'list') {
+    await runMcpList();
+    process.exit(0);
+  }
+
+  if (args[0] === 'install') {
+    if (!args[1]) {
+      console.error('Usage: harness install <package>');
+      process.exit(1);
+    }
+    await runInstall(args[1]);
+    process.exit(0);
+  }
+
+  // Mock `harness run` starting MCP server from installed packages
+  if (args[0] === 'run') {
+    console.log('Starting runtime...');
+    const lockfilePath = path.join(cwd, 'config', 'installed', 'lock.json');
+    if (fs.existsSync(lockfilePath)) {
+      const { ToolRegistry } = await import('../packages/tools/dist/index.js');
+      const { ContextComposer } = await import('../packages/context/dist/index.js');
+      const { PermissionPolicy } = await import('../packages/permissions/dist/index.js');
+      
+      const manager = new McpServerManager();
+      const registry = new ToolRegistry();
+      
+      const lockfile = JSON.parse(fs.readFileSync(lockfilePath, 'utf8'));
+      for (const pkg of Object.values<any>(lockfile.packages)) {
+        if (pkg.type === 'mcp') {
+          console.log(`Initializing MCP package: ${pkg.name}`);
+          // Load manifest to get MCP config
+          const manifestPath = path.join(pkg.installedPath, 'manifest.json');
+          const manifest = fs.existsSync(manifestPath) 
+            ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) 
+            : null;
+            
+          const cmd = manifest?.mcp?.command || 'node';
+          const cmdArgs = manifest?.mcp?.args || [];
+          
+          try {
+            await manager.initializeServer({
+              name: pkg.name,
+              command: cmd,
+              args: cmdArgs.map((a: string) => path.join(pkg.installedPath, a)) // Make relative paths absolute to install dir
+            }, registry);
+            console.log(`Successfully initialized ${pkg.name}`);
+          } catch (e: any) {
+            console.warn(`Failed to initialize MCP package (expected if using dummy server): ${e.message}`);
+          }
+        }
+      }
+      
+      console.log('Registered Tools:', registry.list().map((t: any) => t.name));
+      await manager.closeAll();
+    }
+    process.exit(0);
+  }
+
+  console.log("Phase 0 scaffolding — no commands implemented.");
+}
+
+run().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
