@@ -13,19 +13,46 @@ export class McpServerManager {
   public async initializeServer(config: McpServerConfig, registry: ToolRegistry): Promise<void> {
     const client = new McpClient(config);
     
+    // Parse manifest capabilities if a packagePath is provided
+    let manifestCapabilities: string[] = [];
+    if (config.packagePath) {
+      try {
+        const fs = await import('node:fs/promises');
+        const path = await import('node:path');
+        const manifestPath = path.join(config.packagePath, 'manifest.json');
+        const manifestRaw = await fs.readFile(manifestPath, 'utf8');
+        const manifest = JSON.parse(manifestRaw);
+        if (Array.isArray(manifest.capabilities)) {
+          manifestCapabilities = manifest.capabilities;
+        }
+      } catch (err) {
+        throw new Error(`MCP configuration specified packagePath '${config.packagePath}' but manifest.json could not be read or parsed: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
     try {
       await client.start();
       
       const mcpTools = await client.listTools();
       
       for (const mcpTool of mcpTools) {
+        // Merge explicit config capabilities with manifest capabilities
+        const { parseCapability } = await import('@harness/permissions');
+        
+        const combinedRaw = new Set([
+          ...(config.requiredCapabilities || []),
+          ...manifestCapabilities
+        ]);
+        
+        const mergedCaps = Array.from(combinedRaw).map(c => parseCapability(c));
+
         // Adapt metadata
         const adapter = new McpTool(
           config.name,
           mcpTool.name,
           mcpTool.description || '',
           (mcpTool.inputSchema as Record<string, unknown>) || { type: 'object', properties: {} },
-          config.requiredCapabilities,
+          mergedCaps,
           client
         );
         

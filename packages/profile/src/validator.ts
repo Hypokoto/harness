@@ -17,8 +17,8 @@ export function validateProfileConfig(config: unknown): ProfileConfig {
     errors.push('description must be a string');
   }
 
-  if (obj.model !== undefined && typeof obj.model !== 'string') {
-    errors.push('model must be a string');
+  if (obj.model !== undefined && typeof obj.model !== 'string' && typeof obj.model !== 'object') {
+    errors.push('model must be a string or object');
   }
 
   if (obj.systemPrompt !== undefined && typeof obj.systemPrompt !== 'string') {

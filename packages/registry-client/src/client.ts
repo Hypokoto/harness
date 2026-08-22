@@ -26,7 +26,7 @@ export class RegistryClient {
       const path = fileURLToPath(url);
       return fs.readFile(path, 'utf8');
     }
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
     return res.text();
   }
@@ -36,7 +36,7 @@ export class RegistryClient {
       const path = fileURLToPath(url);
       return fs.readFile(path);
     }
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
     return Buffer.from(await res.arrayBuffer());
   }

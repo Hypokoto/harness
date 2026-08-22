@@ -17,9 +17,5 @@
     "@harness/events": "workspace:*",
     "@harness/profile": "workspace:*",
     "@harness/tools": "workspace:*"
-  },
-  "devDependencies": {
-    "@harness/agent": "workspace:*",
-    "@harness/context": "workspace:*"
   }
 }

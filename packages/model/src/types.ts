@@ -61,6 +61,8 @@ export interface ModelRequest {
     inputSchema?: Record<string, unknown>;
   }>;
   metadata?: Record<string, unknown>;
+  signal?: AbortSignal;
+  timeoutMs?: number;
 }
 
 export interface ModelResponse {

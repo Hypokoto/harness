@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ToolRegistry } from '@harness/tools';
-import { parseCapability, StaticCapabilityPolicy, PermissionDeniedError } from '@harness/permissions';
+import { parseCapability, StaticCapabilityPolicy, PermissionDeniedError, DefaultDenyPolicy } from '@harness/permissions';
 import { ContextComposer, ToolIndex } from '@harness/context';
 import { McpServerManager } from './discovery.js';
 import { validateServerConfig } from './config.js';
@@ -283,4 +283,88 @@ test('SECURITY 4: Config contains malicious arguments -> kept structured', async
   );
   
   await manager.closeAll();
+});
+
+test('SECURITY 5: MCP adapter reads capabilities from install-time manifest', async () => {
+  const fs = await import('node:fs/promises');
+  const os = await import('node:os');
+  const path = await import('node:path');
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'harness-mcp-test-'));
+  
+  // Create a fake manifest with a capability requirement
+  await fs.writeFile(path.join(tmpDir, 'manifest.json'), JSON.stringify({
+    name: 'network-server',
+    version: '1.0.0',
+    capabilities: ['network.access']
+  }));
+
+  const config = {
+    name: 'netSrv',
+    command: process.execPath,
+    args: [testServerPath],
+    packagePath: tmpDir
+  };
+
+  const manager = new McpServerManager();
+  
+  // Attempt with DefaultDenyPolicy (no grants) -> Should fail
+  const denyRegistry = new ToolRegistry({ policy: new DefaultDenyPolicy() });
+  await manager.initializeServer(config, denyRegistry);
+  
+  await assert.rejects(
+    async () => denyRegistry.execute('netSrv.echo', { message: 'hello' }),
+    (err: any) => {
+      assert.ok(err instanceof PermissionDeniedError);
+      assert.ok(err.message.includes('network.access'));
+      return true;
+    },
+    'Tool must be denied because manifest requires "network.access" capability'
+  );
+  
+  await manager.closeAll();
+
+  // Attempt with granted capability -> Should succeed
+  const allowRegistry = new ToolRegistry({ policy: new StaticCapabilityPolicy(['network.access']) });
+  await manager.initializeServer(config, allowRegistry);
+  
+  const result = await allowRegistry.execute('netSrv.echo', { message: 'hello' }) as any[];
+  assert.equal(result[0].text, 'echo: hello', 'Tool must execute successfully when capability is granted');
+  
+  await manager.closeAll();
+  
+  // Cleanup
+  await fs.rm(tmpDir, { recursive: true, force: true });
+});
+
+test('SECURITY 6: MCP adapter fails initialization if manifest.json is missing when packagePath is set', async () => {
+  const fs = await import('node:fs/promises');
+  const os = await import('node:os');
+  const path = await import('node:path');
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'harness-mcp-test-missing-'));
+  
+  // We DO NOT create a manifest.json in tmpDir to simulate a corrupt/missing install
+  
+  const config = {
+    name: 'corruptSrv',
+    command: process.execPath,
+    args: [testServerPath],
+    packagePath: tmpDir
+  };
+
+  const manager = new McpServerManager();
+  const registry = new ToolRegistry({ policy: new DefaultDenyPolicy() });
+  
+  // Initialization should throw because packagePath was given but manifest is unreadable
+  await assert.rejects(
+    async () => manager.initializeServer(config, registry),
+    /manifest.json could not be read or parsed/
+  );
+  
+  // The server's tools should NOT be registered
+  assert.equal(registry.has('corruptSrv.echo'), false, 'Tools from a corrupt server should not be registered');
+  
+  await manager.closeAll();
+  await fs.rm(tmpDir, { recursive: true, force: true });
 });

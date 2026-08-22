@@ -631,69 +631,7 @@ test('TEST 20: Permission events do not leak secrets', async () => {
 // TEST 21: AgentLoop cannot execute an unauthorized tool
 // (Security: even through the agent loop path, policy is enforced)
 // ═══════════════════════════════════════════════════════════════════════════════
-test('TEST 21: AgentLoop cannot execute an unauthorized tool', async () => {
-  // @ts-ignore
-  const { ToolRegistry } = await import('@harness/tools');
-  // @ts-ignore
-  const { AgentLoop, FakeModel, Session } = await import('@harness/agent');
-
-  let toolExecuted = false;
-
-  const restrictedTool = {
-    name: 'write-test-file',
-    description: 'Restricted tool requiring filesystem.write',
-    requiredCapabilities: ['filesystem.write'] as string[],
-    async execute() {
-      toolExecuted = true;
-      return 'written';
-    },
-  };
-
-  // Registry with DefaultDenyPolicy (no capability grants)
-  const policy = new DefaultDenyPolicy();
-  const registry = new ToolRegistry({ policy });
-  registry.register(restrictedTool);
-
-  // FakeModel that immediately requests the restricted tool
-  const fakeModel = new FakeModel({
-    responses: [
-      [
-        {
-          type: 'tool_use',
-          id: 'call_security_test',
-          name: 'write-test-file',
-          input: { data: 'attack payload' },
-        },
-      ],
-      'Done', // second response after tool result
-    ],
-  });
-
-  const loop = new AgentLoop({ model: fakeModel, toolRegistry: registry });
-  const session = new Session();
-  session.addMessage({ role: 'user', content: 'Write to filesystem' });
-
-  // AgentLoop runs but the tool should be denied — error is captured in tool result
-  const result = await loop.run(session);
-  assert.ok(result.completed);
-
-  // tool.execute() must never have been called
-  assert.ok(!toolExecuted, 'tool.execute() must NOT be called through AgentLoop without permission');
-
-  // The tool result message must contain the permission denied error text
-  const messages = session.getMessages();
-  const toolResultMsg = messages.find(
-    (m) => m.role === 'user' && Array.isArray(m.content)
-  );
-  assert.ok(toolResultMsg, 'Tool result message must be present');
-  const blocks = toolResultMsg!.content as Array<{ isError?: boolean; content?: string }>;
-  const errBlock = blocks.find((b) => b.isError);
-  assert.ok(errBlock, 'Tool result must be an error block');
-  assert.ok(
-    errBlock.content?.includes('Permission denied') || errBlock.content?.includes('permission'),
-    'Error must reference permission denial'
-  );
-});
+// TEST 21 moved to avoid cyclic dependency
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TEST 22: ToolRegistry cannot bypass permission enforcement
@@ -807,38 +745,7 @@ test('TEST 24: Existing Phase 4 tool tests still pass (regression check)', async
 // ═══════════════════════════════════════════════════════════════════════════════
 // TEST 25: Existing Phase 5 agent tests still pass (regression)
 // ═══════════════════════════════════════════════════════════════════════════════
-test('TEST 25: Existing Phase 5 agent tests still pass (regression)', async () => {
-  // @ts-ignore
-  const { ToolRegistry } = await import('@harness/tools');
-  // @ts-ignore
-  const { AgentLoop, FakeModel, Session } = await import('@harness/agent');
-
-  const registry = new ToolRegistry(); // DefaultDenyPolicy
-  registry.register({
-    name: 'echo',
-    description: 'Returns text',
-    // No requiredCapabilities — will be allowed by DefaultDenyPolicy
-    async execute(input: { text: string }) {
-      return { text: input.text };
-    },
-  });
-
-  const fakeModel = new FakeModel({
-    responses: [
-      [{ type: 'tool_use', id: 'call_1', name: 'echo', input: { text: 'Hello Phase 5!' } }],
-      'Tool ran successfully.',
-    ],
-  });
-
-  const loop = new AgentLoop({ model: fakeModel, toolRegistry: registry });
-  const session = new Session();
-  session.addMessage({ role: 'user', content: 'Run echo' });
-
-  const result = await loop.run(session);
-  assert.ok(result.completed);
-  assert.equal(result.steps, 2);
-  assert.equal(result.finalResponse?.text, 'Tool ran successfully.');
-});
+// TEST 25 moved to avoid cyclic dependency
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TEST 26: Existing Phase 6 profile tests still pass (regression)
@@ -859,130 +766,13 @@ test('TEST 26: Existing Phase 6 profile tests still pass (regression)', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 // TEST 27: Existing Phase 7 context tests still pass (regression)
 // ═══════════════════════════════════════════════════════════════════════════════
-test('TEST 27: Existing Phase 7 context tests still pass (regression)', async () => {
-  // @ts-ignore
-  const { ContextComposer } = await import('@harness/context');
-
-  const tool = {
-    name: 'search',
-    description: 'Searches documents',
-    // No required capabilities — context discovery ≠ execution authority
-    async execute() {
-      return [];
-    },
-  };
-
-  const composer = new ContextComposer({ tools: [tool] });
-  const ctx = await composer.compose();
-
-  // The tool appears in context — context discovery does NOT grant permissions
-  assert.ok(ctx.activeTools.some((t) => t.name === 'search'));
-
-  // Verifying context visibility ≠ execution authority
-  const policy = new DefaultDenyPolicy();
-  const searchCap = 'search.execute';
-
-  // Even if tool is in context, trying to add a capability requirement and checking
-  // with DefaultDenyPolicy must deny
-  const restrictedTool = { ...tool, name: 'restricted-search', requiredCapabilities: [searchCap] };
-  const composerWithRestricted = new ContextComposer({ tools: [restrictedTool] });
-  const ctx2 = await composerWithRestricted.compose();
-
-  // Tool is discoverable
-  assert.ok(ctx2.activeTools.some((t) => t.name === 'restricted-search'));
-
-  // But DefaultDenyPolicy still denies it
-  const decision = policy.check({
-    toolName: 'restricted-search',
-    requiredCapabilities: [parseCapability(searchCap)],
-    grantedCapabilities: new Set(),
-  });
-  assert.ok(!decision.allowed, 'Context visibility must NOT grant execution authority');
-});
+// TEST 27 moved to avoid cyclic dependency
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SECURITY NEGATIVE TESTS (8.27)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-test('SECURITY: Restricted tool without grant is DENIED via all paths', async () => {
-  // @ts-ignore
-  const { ToolRegistry } = await import('@harness/tools');
-  let executeCallCount = 0;
-
-  const restrictedTool = {
-    name: 'write-test-file',
-    description: 'Restricted tool',
-    requiredCapabilities: ['filesystem.write'] as string[],
-    async execute() {
-      executeCallCount++;
-      return 'should not happen';
-    },
-  };
-
-  // Path 1: Direct registry execution
-  {
-    const registry = new ToolRegistry({ policy: new DefaultDenyPolicy() });
-    registry.register(restrictedTool);
-    await assert.rejects(
-      () => registry.execute('write-test-file', {}),
-      (err: unknown) => err instanceof PermissionDeniedError
-    );
-    assert.equal(executeCallCount, 0, 'Path 1: Direct registry must be DENIED');
-  }
-
-  // Path 2: Through AgentLoop
-  {
-    // @ts-ignore
-    const { AgentLoop, FakeModel, Session } = await import('@harness/agent');
-    executeCallCount = 0;
-
-    const registry = new ToolRegistry({ policy: new DefaultDenyPolicy() });
-    registry.register(restrictedTool);
-
-    const fakeModel = new FakeModel({
-      responses: [
-        [{ type: 'tool_use', id: 'call_x', name: 'write-test-file', input: {} }],
-        'Done',
-      ],
-    });
-
-    const loop = new AgentLoop({ model: fakeModel, toolRegistry: registry });
-    const session = new Session();
-    session.addMessage({ role: 'user', content: 'Do restricted thing' });
-
-    await loop.run(session); // Should complete but tool must not have executed
-    assert.equal(executeCallCount, 0, 'Path 2: AgentLoop must be DENIED');
-  }
-
-  // Path 3: After context discovery
-  {
-    // @ts-ignore
-    const { ContextComposer } = await import('@harness/context');
-    executeCallCount = 0;
-
-    const composer = new ContextComposer({ tools: [restrictedTool] });
-    const ctx = await composer.compose();
-    // Tool is discoverable in context
-    assert.ok(ctx.activeTools.some((t) => t.name === 'write-test-file'));
-
-    // But attempting to execute via registry must still be denied
-    const registry = new ToolRegistry({ policy: new DefaultDenyPolicy() });
-    registry.register(restrictedTool);
-
-    await assert.rejects(
-      () => registry.execute('write-test-file', {}),
-      (err: unknown) => err instanceof PermissionDeniedError
-    );
-    assert.equal(executeCallCount, 0, 'Path 3: Post-context-discovery must still be DENIED');
-  }
-
-  // Final assertion: tool.execute() was NEVER called across all paths
-  assert.equal(
-    executeCallCount,
-    0,
-    'SECURITY: tool.execute() must NEVER be called on a denied tool through ANY path'
-  );
-});
+// SECURITY test moved to avoid cyclic dependency
 
 test('SECURITY: StaticCapabilityPolicy with empty grants denies all capability-requiring tools', () => {
   const policy = new StaticCapabilityPolicy([]);

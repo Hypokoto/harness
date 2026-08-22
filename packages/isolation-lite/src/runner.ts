@@ -1,10 +1,12 @@
 import { fork } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import type { ToolRegistry } from '@harness/tools';
 
 export interface SandboxSpec {
   script: string;
   timeoutMs?: number;
+  toolRegistry?: ToolRegistry;
 }
 
 export class SandboxRunner {
@@ -21,14 +23,27 @@ export class SandboxRunner {
         }, spec.timeoutMs);
       }
 
-      child.on('message', (msg: any) => {
-        if (timeoutId) clearTimeout(timeoutId);
-        if (msg.error) {
-          reject(new Error(msg.error));
+      child.on('message', async (msg: any) => {
+        if (msg.type === 'tool_call') {
+          if (!spec.toolRegistry) {
+            child.send({ type: 'tool_result', id: msg.id, error: 'No ToolRegistry attached to Sandbox' });
+            return;
+          }
+          try {
+            const res = await spec.toolRegistry.execute(msg.toolName, msg.args);
+            child.send({ type: 'tool_result', id: msg.id, result: res });
+          } catch (err: any) {
+            child.send({ type: 'tool_result', id: msg.id, error: err.message });
+          }
         } else {
-          resolve(msg.result);
+          if (timeoutId) clearTimeout(timeoutId);
+          if (msg.error) {
+            reject(new Error(msg.error));
+          } else {
+            resolve(msg.result);
+          }
+          child.kill();
         }
-        child.kill();
       });
 
       child.on('error', (err) => {

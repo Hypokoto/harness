@@ -147,7 +147,30 @@ export class ToolRegistry {
     }
 
     try {
-      return await tool.execute(validatedInput, context);
+      // Step 29: Tool Output Limits
+      // Add bounded output handling and timeout for potentially blocking tools
+      const MAX_OUTPUT_SIZE = 100 * 1024; // 100KB is reasonable for LLM context
+      
+      const executePromise = tool.execute(validatedInput, context);
+      
+      // Step 10: Timeout Audit
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Tool execution timeout (30s)')), 30000);
+      });
+      
+      let rawResult = await Promise.race([executePromise, timeoutPromise]);
+      
+      // Verify size
+      const resultStr = typeof rawResult === 'string' ? rawResult : JSON.stringify(rawResult);
+      if (resultStr && resultStr.length > MAX_OUTPUT_SIZE) {
+        // Truncate to prevent context destruction
+        if (typeof rawResult === 'string') {
+          return rawResult.substring(0, MAX_OUTPUT_SIZE) + '... [TRUNCATED]';
+        }
+        return `[TRUNCATED: Output size exceeded ${MAX_OUTPUT_SIZE} bytes]`;
+      }
+      return rawResult;
+      
     } catch (error) {
       if (error instanceof InvalidInputError) {
         throw error;

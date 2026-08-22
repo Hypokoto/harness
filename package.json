@@ -14,6 +14,7 @@
     "packages/*"
   ],
   "devDependencies": {
+    "@modelcontextprotocol/server-everything": "^2026.8.18",
     "@types/node": "^26.2.0",
     "typescript": "^5.5.4"
   }

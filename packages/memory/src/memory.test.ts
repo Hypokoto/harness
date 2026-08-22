@@ -125,7 +125,7 @@ test('Memory Architecture Tests', async (t) => {
     }
     const provider = new MemoryProvider(store, new MockEmbedder(), { enabled: true, topK: 5 });
     const tools = provider.getTools();
-    await tools[0].execute({ query: 'C' });
+    await tools[0].execute({ query: 'C' }, {});
     const prompt = provider.getSystemPrompt() || '';
     const memoryCount = (prompt.match(/\[Memory:/g) || []).length;
     assert.strictEqual(memoryCount, 5); // Max 5 composed
@@ -142,13 +142,13 @@ test('Memory Architecture Tests', async (t) => {
       search: () => Promise.reject(new Error('Qdrant offline'))
     };
     const provider = new MemoryProvider(failStore, new MockEmbedder(), { enabled: true });
-    const res = await provider.getTools()[0].execute({ query: 'C' });
+    const res = await provider.getTools()[0].execute({ query: 'C' }, {});
     assert.match(res as string, /Qdrant\/Storage failure: Qdrant offline/);
   });
 
   await t.test('TEST 21: Embedding failure is handled cleanly', async () => {
     const provider = new MemoryProvider(new QdrantStore({url:'', collection:''}), new MockEmbedder(), { enabled: true });
-    const res = await provider.getTools()[0].execute({ query: 'fail' });
+    const res = await provider.getTools()[0].execute({ query: 'fail' }, {});
     assert.match(res as string, /Embedding failure: Simulated embedding failure/);
   });
 
@@ -176,7 +176,7 @@ test('Memory Architecture Tests', async (t) => {
     // Qdrant unavailable
     const failStore: any = { search: () => Promise.reject(new Error('Down')) };
     const p2 = new MemoryProvider(failStore, new MockEmbedder(), { enabled: true });
-    const r = await p2.getTools()[0].execute({ query: 'a' });
+    const r = await p2.getTools()[0].execute({ query: 'a' }, {});
     assert.match(r as string, /Storage failure: Down/);
   });
 });

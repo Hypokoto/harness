@@ -3,6 +3,7 @@ import type { ToolRegistry } from '@harness/tools';
 import type { ContextComposer } from '@harness/context';
 import { AgentLoop, Session } from '@harness/agent';
 import type { EventStore } from '@harness/events';
+import { SubagentLimitExceededError } from './errors.js';
 
 export interface SubagentSpec {
   task: string;
@@ -33,7 +34,7 @@ export class SubagentRunner {
       return {
         status: 'failed',
         summary: 'Max subagent depth exceeded',
-        error: new Error(`Subagent depth limit (${maxDepth}) reached. Cannot spawn.`)
+        error: new SubagentLimitExceededError(`Subagent depth limit (${maxDepth}) reached. Cannot spawn.`)
       };
     }
 

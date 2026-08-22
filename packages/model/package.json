@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "tsc -b --clean",
-    "test": "node --test dist/model.test.js"
+    "test": "node --test 'dist/**/*.test.js'"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0"

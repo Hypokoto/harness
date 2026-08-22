@@ -1,0 +1,18 @@
+{
+  "name": "@harness/isolation-lite",
+  "version": "0.0.0-phase13",
+  "description": "Restricted execution environment using node:vm. NOT a security boundary — do not run untrusted or adversarial code through this. Process-level isolation (bwrap/namespaces) required before any shell.execute or network capability ships to a live tool.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@harness/tools": "workspace:*"
+  },
+  "devDependencies": {
+    "@harness/permissions": "workspace:*"
+  }
+}

@@ -5,6 +5,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import * as tar from 'tar';
 import type { PackageManifest, LockfilePackage } from './types.js';
+import { RegistryError, ChecksumMismatchError } from './errors.js';
 
 export interface InstallerOptions {
   installDir: string;
@@ -22,7 +23,7 @@ export class Installer {
   async install(manifest: PackageManifest, artifactBuffer: Buffer, registryUrl: string): Promise<LockfilePackage> {
     const hash = crypto.createHash('sha256').update(artifactBuffer).digest('hex');
     if (hash !== manifest.checksum) {
-      throw new Error(`Checksum mismatch. Expected ${manifest.checksum}, got ${hash}`);
+      throw new ChecksumMismatchError(manifest.checksum, hash);
     }
 
     if (!/^[a-zA-Z0-9\-_\.]+$/.test(manifest.name)) {

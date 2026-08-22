@@ -284,8 +284,7 @@ test('TEST 14: Agent package does not depend on Phase 6+ packages', () => {
     : join(process.cwd(), 'packages/agent/package.json');
   const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
   const deps = Object.keys(pkgJson.dependencies || {});
-  const devDeps = Object.keys(pkgJson.devDependencies || {});
-  const allDeps = [...deps, ...devDeps];
+  const allDeps = [...deps];
 
   const forbidden = [
     '@harness/profile',

@@ -11,4 +11,6 @@ export interface McpServerConfig {
   env?: Record<string, string>;
   /** Required capabilities for tools exposed by this server. */
   requiredCapabilities?: Capability[];
+  /** Path to the installed package directory containing manifest.json */
+  packagePath?: string;
 }

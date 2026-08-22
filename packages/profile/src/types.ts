@@ -1,7 +1,7 @@
 export interface ProfileConfig {
   name?: string;
   description?: string;
-  model?: string;
+  model?: string | Record<string, unknown>;
   systemPrompt?: string;
   maxSteps?: number;
   temperature?: number;
