@@ -32,6 +32,7 @@
     { "path": "./packages/permissions" },
     { "path": "./packages/agent" },
     { "path": "./packages/context" },
+    { "path": "./packages/mcp" },
     { "path": "./packages/registry-client" }
   ],
   "files": []

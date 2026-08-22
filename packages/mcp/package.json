@@ -1,0 +1,27 @@
+{
+  "name": "@harness/mcp",
+  "version": "0.0.0-phase9",
+  "description": "MCP plugin type",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "node --test dist/mcp.test.js",
+    "clean": "tsc -b --clean"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@harness/events": "workspace:*",
+    "@harness/profile": "workspace:*",
+    "@harness/permissions": "workspace:*",
+    "@harness/tools": "workspace:*"
+  },
+  "devDependencies": {
+    "@harness/agent": "workspace:*",
+    "@harness/context": "workspace:*"
+  }
+}
