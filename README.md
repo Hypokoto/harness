@@ -57,7 +57,7 @@ Phases execute in strict sequence. Do not touch a later phase's package until th
 9 MCP plugin type                     — done  (McpTool implements Tool, inherits permission gate automatically)
 10 Registry client                      — done  (manifest requires capabilities[] + checksum, lockfile, no server code)
 11 Skill plugin type                     — built, needs test-run confirmation (path-traversal guard present in loader)
-12 Memory                                  — folder exists, NOT YET AUDITED
+12 Memory                                  — done  (provider, qdrant mock, conflict/dedup, typed errors, tests pass)
 13 Sandbox / subagents / signing             — folders exist, NOT YET AUDITED — was explicitly deferred, confirm this was a deliberate jump
 ```
 
