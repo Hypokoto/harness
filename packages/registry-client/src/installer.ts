@@ -25,6 +25,15 @@ export class Installer {
       throw new Error(`Checksum mismatch. Expected ${manifest.checksum}, got ${hash}`);
     }
 
+    if (!/^[a-zA-Z0-9\-_\.]+$/.test(manifest.name)) {
+      throw new Error(`Invalid package name: ${manifest.name}`);
+    }
+    
+    if (!/^[a-zA-Z0-9\-_\.]+$/.test(manifest.version)) {
+      throw new Error(`Invalid package version: ${manifest.version}`);
+    }
+
+
     await fs.mkdir(this.tmpDir, { recursive: true });
     const stagingDir = path.join(this.tmpDir, `${manifest.name}-${manifest.version}-${Date.now()}`);
     

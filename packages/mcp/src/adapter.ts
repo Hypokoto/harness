@@ -1,6 +1,6 @@
 import type { Capability } from '@harness/permissions';
 import { ToolExecutionError, type Tool, type ToolContext } from '@harness/tools';
-import { MCPToolError } from './errors.js';
+import { MCPToolError, MCPConnectionError } from './errors.js';
 
 export interface McpClientAdapter {
   callTool(name: string, args: Record<string, unknown>): Promise<unknown>;
@@ -40,7 +40,7 @@ export class McpTool implements Tool<any, any> {
       const result = await this.client.callTool(this.mcpToolName, input || {});
       return this.normalizeResult(result);
     } catch (error) {
-      if (error instanceof Error && error.name === 'MCPConnectionError') {
+      if (error instanceof MCPConnectionError) {
         throw error;
       }
       throw new ToolExecutionError(
