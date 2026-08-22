@@ -74,6 +74,21 @@ importers:
         specifier: workspace:*
         version: link:../context
 
+  packages/memory:
+    dependencies:
+      '@harness/context':
+        specifier: workspace:*
+        version: link:../context
+      '@harness/model':
+        specifier: workspace:*
+        version: link:../model
+      '@harness/profile':
+        specifier: workspace:*
+        version: link:../profile
+      '@harness/tools':
+        specifier: workspace:*
+        version: link:../tools
+
   packages/model:
     dependencies:
       '@anthropic-ai/sdk':

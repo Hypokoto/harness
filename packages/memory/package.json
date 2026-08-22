@@ -1,0 +1,22 @@
+{
+  "name": "@harness/memory",
+  "version": "0.0.0-phase12",
+  "description": "Memory package - ContextProvider memory adapter and storage abstractions",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "node --test dist/*.test.js",
+    "clean": "tsc -b --clean"
+  },
+  "dependencies": {
+    "@harness/context": "workspace:*",
+    "@harness/profile": "workspace:*",
+    "@harness/model": "workspace:*",
+    "@harness/tools": "workspace:*"
+  }
+}
