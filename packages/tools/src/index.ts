@@ -1,5 +1,3 @@
-/**
- * @harness/tools
- * Phase 0 boundary placeholder.
- */
-export {};
+export * from './errors.js';
+export * from './types.js';
+export * from './registry.js';
