@@ -1,7 +1,7 @@
 {
   "name": "@harness/context",
-  "version": "0.0.0-phase0",
-  "description": "Context package - ContextProvider, Context Composer, lazy tool loading",
+  "version": "0.0.0-phase7",
+  "description": "Context package - ContextProvider, ContextComposer, lazy tool loading",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,5 +11,11 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "tsc -b --clean"
+  },
+  "dependencies": {
+    "@harness/agent": "workspace:*",
+    "@harness/model": "workspace:*",
+    "@harness/profile": "workspace:*",
+    "@harness/tools": "workspace:*"
   }
 }
