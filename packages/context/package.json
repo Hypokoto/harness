@@ -10,11 +10,13 @@
   },
   "scripts": {
     "build": "tsc -b",
+    "test": "node --test dist/context.test.js",
     "clean": "tsc -b --clean"
   },
   "dependencies": {
     "@harness/agent": "workspace:*",
     "@harness/model": "workspace:*",
+    "@harness/permissions": "workspace:*",
     "@harness/profile": "workspace:*",
     "@harness/tools": "workspace:*"
   }

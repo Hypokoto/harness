@@ -7,5 +7,12 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../agent" },
+    { "path": "../model" },
+    { "path": "../permissions" },
+    { "path": "../profile" },
+    { "path": "../tools" }
+  ]
 }

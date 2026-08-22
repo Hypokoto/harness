@@ -1,6 +1,6 @@
 {
   "name": "@harness/permissions",
-  "version": "0.0.0-phase0",
+  "version": "0.0.0-phase8",
   "description": "Permissions package - Capability, PermissionPolicy",
   "type": "module",
   "main": "./dist/index.js",
@@ -10,6 +10,16 @@
   },
   "scripts": {
     "build": "tsc -b",
+    "test": "node --test dist/permissions.test.js",
     "clean": "tsc -b --clean"
+  },
+  "dependencies": {
+    "@harness/events": "workspace:*",
+    "@harness/profile": "workspace:*",
+    "@harness/tools": "workspace:*"
+  },
+  "devDependencies": {
+    "@harness/agent": "workspace:*",
+    "@harness/context": "workspace:*"
   }
 }

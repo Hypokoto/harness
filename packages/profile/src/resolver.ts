@@ -99,6 +99,11 @@ export class ProfileResolver {
     if (config.plugins) {
       lines.push(`plugins = [${config.plugins.map((p) => `"${p}"`).join(', ')}]`);
     }
+    if (config.grantedCapabilities && config.grantedCapabilities.length > 0) {
+      lines.push(
+        `grantedCapabilities = [${config.grantedCapabilities.map((c) => `"${c}"`).join(', ')}]`
+      );
+    }
 
     if (config.env && Object.keys(config.env).length > 0) {
       lines.push('\n[env]');

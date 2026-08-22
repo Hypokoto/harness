@@ -10,6 +10,7 @@ export const BUILTIN_DEFAULT_PROFILE: Required<Omit<ProfileConfig, 'description'
   allowedTools: [],
   deniedTools: [],
   plugins: [],
+  grantedCapabilities: [],
   env: {},
   settings: {},
   metadata: {},

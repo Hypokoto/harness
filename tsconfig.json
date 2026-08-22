@@ -27,11 +27,11 @@
     { "path": "./packages/kernel" },
     { "path": "./packages/events" },
     { "path": "./packages/model" },
+    { "path": "./packages/profile" },
     { "path": "./packages/tools" },
+    { "path": "./packages/permissions" },
     { "path": "./packages/agent" },
     { "path": "./packages/context" },
-    { "path": "./packages/permissions" },
-    { "path": "./packages/profile" },
     { "path": "./packages/registry-client" }
   ],
   "files": []

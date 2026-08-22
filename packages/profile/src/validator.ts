@@ -55,6 +55,15 @@ export function validateProfileConfig(config: unknown): ProfileConfig {
     }
   }
 
+  if (obj.grantedCapabilities !== undefined) {
+    if (
+      !Array.isArray(obj.grantedCapabilities) ||
+      !obj.grantedCapabilities.every((c) => typeof c === 'string')
+    ) {
+      errors.push('grantedCapabilities must be an array of strings');
+    }
+  }
+
   if (obj.env !== undefined) {
     if (typeof obj.env !== 'object' || obj.env === null || Array.isArray(obj.env)) {
       errors.push('env must be an object of key-value string pairs');

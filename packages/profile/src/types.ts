@@ -8,6 +8,12 @@ export interface ProfileConfig {
   allowedTools?: string[];
   deniedTools?: string[];
   plugins?: string[];
+  /**
+   * Capabilities explicitly granted to tools by this profile.
+   * Used by @harness/permissions to build a PermissionPolicy.
+   * Example: ["filesystem.read", "network.connect"]
+   */
+  grantedCapabilities?: string[];
   env?: Record<string, string>;
   settings?: Record<string, unknown>;
   metadata?: Record<string, unknown>;

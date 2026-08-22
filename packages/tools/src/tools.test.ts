@@ -190,8 +190,11 @@ test('TEST 12: Tool package does not depend on agent/context/permissions/MCP', (
   const devDeps = Object.keys(pkgJson.devDependencies || {});
   const allDeps = [...deps, ...devDeps];
 
+  // Phase 8: Permission types are defined inline in tools (no external dependency).
+  // tools → events is the only cross-package dependency needed.
   const forbidden = ['@harness/agent', '@harness/context', '@harness/permissions', '@harness/mcp'];
   for (const f of forbidden) {
     assert.equal(allDeps.includes(f), false, `Package must not depend on ${f}`);
   }
 });
+

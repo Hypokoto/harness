@@ -24,6 +24,9 @@ export function deepMergeProfiles(layers: Partial<ProfileConfig>[]): ProfileConf
     if (layer.plugins !== undefined) {
       result.plugins = [...layer.plugins];
     }
+    if (layer.grantedCapabilities !== undefined) {
+      result.grantedCapabilities = [...layer.grantedCapabilities];
+    }
 
     // Dictionaries (deep merge rule)
     if (layer.env !== undefined) {

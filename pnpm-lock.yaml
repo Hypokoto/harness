@@ -35,6 +35,9 @@ importers:
       '@harness/model':
         specifier: workspace:*
         version: link:../model
+      '@harness/permissions':
+        specifier: workspace:*
+        version: link:../permissions
       '@harness/profile':
         specifier: workspace:*
         version: link:../profile
@@ -52,13 +55,34 @@ importers:
         specifier: ^0.120.0
         version: 0.120.0
 
-  packages/permissions: {}
+  packages/permissions:
+    dependencies:
+      '@harness/events':
+        specifier: workspace:*
+        version: link:../events
+      '@harness/profile':
+        specifier: workspace:*
+        version: link:../profile
+      '@harness/tools':
+        specifier: workspace:*
+        version: link:../tools
+    devDependencies:
+      '@harness/agent':
+        specifier: workspace:*
+        version: link:../agent
+      '@harness/context':
+        specifier: workspace:*
+        version: link:../context
 
   packages/profile: {}
 
   packages/registry-client: {}
 
-  packages/tools: {}
+  packages/tools:
+    dependencies:
+      '@harness/events':
+        specifier: workspace:*
+        version: link:../events
 
 packages:
 
