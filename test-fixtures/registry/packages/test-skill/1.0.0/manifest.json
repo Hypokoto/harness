@@ -1,0 +1,11 @@
+{
+  "name": "test-skill",
+  "version": "1.0.0",
+  "type": "skill",
+  "description": "A test skill package",
+  "artifact": {
+    "type": "tarball",
+    "url": "packages/test-skill/1.0.0/archive.tar.gz"
+  },
+  "checksum": "f7d2fce9c5e66673b12c88cf1f4ba2b32ed55028b3a93ece48be9e396669401a"
+}

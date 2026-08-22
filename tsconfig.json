@@ -33,7 +33,8 @@
     { "path": "./packages/agent" },
     { "path": "./packages/context" },
     { "path": "./packages/mcp" },
-    { "path": "./packages/registry-client" }
+    { "path": "./packages/registry-client" },
+    { "path": "./packages/skills" }
   ],
   "files": []
 }

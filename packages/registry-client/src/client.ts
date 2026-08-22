@@ -85,7 +85,7 @@ export class RegistryClient {
     if (manifest.version !== version) {
       throw new Error('Manifest/version mismatch');
     }
-    if (manifest.type !== 'mcp') {
+    if (manifest.type !== 'mcp' && manifest.type !== 'skill') {
       throw new Error(`Unsupported package type: ${manifest.type}`);
     }
 

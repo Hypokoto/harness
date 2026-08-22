@@ -120,14 +120,16 @@ async function run() {
       const { ContextComposer } = await import('../packages/context/dist/index.js');
       const { PermissionPolicy } = await import('../packages/permissions/dist/index.js');
       
+      const { SkillRegistry, SkillProvider } = await import('../packages/skills/dist/index.js');
+      
       const manager = new McpServerManager();
       const registry = new ToolRegistry();
+      const skillRegistry = new SkillRegistry();
       
       const lockfile = JSON.parse(fs.readFileSync(lockfilePath, 'utf8'));
       for (const pkg of Object.values<any>(lockfile.packages)) {
         if (pkg.type === 'mcp') {
           console.log(`Initializing MCP package: ${pkg.name}`);
-          // Load manifest to get MCP config
           const manifestPath = path.join(pkg.installedPath, 'manifest.json');
           const manifest = fs.existsSync(manifestPath) 
             ? JSON.parse(fs.readFileSync(manifestPath, 'utf8')) 
@@ -140,16 +142,37 @@ async function run() {
             await manager.initializeServer({
               name: pkg.name,
               command: cmd,
-              args: cmdArgs.map((a: string) => path.join(pkg.installedPath, a)) // Make relative paths absolute to install dir
+              args: cmdArgs.map((a: string) => path.join(pkg.installedPath, a))
             }, registry);
             console.log(`Successfully initialized ${pkg.name}`);
           } catch (e: any) {
             console.warn(`Failed to initialize MCP package (expected if using dummy server): ${e.message}`);
           }
+        } else if (pkg.type === 'skill') {
+          console.log(`Initializing Skill package: ${pkg.name}`);
+          try {
+            await skillRegistry.registerFromDirectory(pkg.installedPath);
+            console.log(`Successfully registered skill ${pkg.name}`);
+          } catch (e: any) {
+            console.warn(`Failed to register skill ${pkg.name}: ${e.message}`);
+          }
         }
       }
       
+      const skillProvider = new SkillProvider(skillRegistry);
+      const composer = new ContextComposer({
+        providers: [skillProvider]
+      });
+      
+      // The skills themselves belong to the context system, but the search/load tools
+      // must be registered in the ToolRegistry so the AgentLoop can execute them.
+      for (const tool of skillProvider.getTools()) {
+        registry.register(tool);
+      }
+      
       console.log('Registered Tools:', registry.list().map((t: any) => t.name));
+      const composedContext = await composer.compose();
+      console.log('Composed Context active tools:', composedContext.activeTools.map(t => t.name));
       await manager.closeAll();
     }
     process.exit(0);

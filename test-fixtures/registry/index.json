@@ -5,6 +5,11 @@
       "versions": [
         "1.0.0"
       ]
+    },
+    "test-skill": {
+      "versions": [
+        "1.0.0"
+      ]
     }
   }
 }

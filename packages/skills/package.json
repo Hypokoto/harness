@@ -1,0 +1,21 @@
+{
+  "name": "@harness/skills",
+  "version": "0.0.0-phase11",
+  "description": "Skills package - Declarative Skill plugin type",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "node --test dist/skills.test.js",
+    "clean": "tsc -b --clean"
+  },
+  "dependencies": {
+    "@harness/context": "workspace:*",
+    "@harness/tools": "workspace:*",
+    "@harness/model": "workspace:*"
+  }
+}
