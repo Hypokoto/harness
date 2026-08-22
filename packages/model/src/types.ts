@@ -11,14 +11,34 @@ export type ImageContentBlock = {
   data: string;
 };
 
-export type ContentBlock = TextContentBlock | ImageContentBlock;
+export type ToolUseContentBlock = {
+  type: 'tool_use';
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+};
+
+export type ToolResultContentBlock = {
+  type: 'tool_result';
+  toolUseId: string;
+  content: string | ContentBlock[];
+  isError?: boolean;
+};
+
+export type ContentBlock =
+  | TextContentBlock
+  | ImageContentBlock
+  | ToolUseContentBlock
+  | ToolResultContentBlock;
 
 export interface Message {
   role: Role;
   content: string | ContentBlock[];
 }
 
-export type StopReason = 'end_turn' | 'max_tokens' | 'stop_sequence' | 'unknown';
+export type ModelMessage = Message;
+
+export type StopReason = 'end_turn' | 'max_tokens' | 'stop_sequence' | 'tool_use' | 'unknown';
 
 export interface TokenUsage {
   inputTokens: number;
@@ -35,6 +55,11 @@ export interface ModelRequest {
   topP?: number;
   topK?: number;
   stopSequences?: string[];
+  tools?: Array<{
+    name: string;
+    description: string;
+    inputSchema?: Record<string, unknown>;
+  }>;
   metadata?: Record<string, unknown>;
 }
 
