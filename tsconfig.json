@@ -37,7 +37,8 @@
     { "path": "./packages/skills" },
     { "path": "./packages/memory" },
     { "path": "./packages/subagents" },
-    { "path": "./packages/sandbox" }
+    { "path": "./packages/isolation-lite" },
+    { "path": "./cli" }
   ],
   "files": []
 }

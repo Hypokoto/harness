@@ -1,21 +1,42 @@
 {
   "name": "harness-monorepo",
   "private": true,
-  "version": "0.0.0-phase0",
+  "version": "0.1.0",
   "description": "AI Agent Harness Runtime Workspace",
   "type": "module",
+  "bin": {
+    "harness": "./cli/dist/bin.js"
+  },
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --noEmit",
     "test": "pnpm -r --if-present test",
-    "clean": "tsc -b --clean"
+    "clean": "tsc -b --clean",
+    "harness": "node --enable-source-maps ./cli/dist/bin.js",
+    "dev:harness": "npx tsx cli/bin.ts"
   },
   "workspaces": [
     "packages/*"
   ],
+  "dependencies": {
+    "@harness/kernel": "workspace:*",
+    "@harness/agent": "workspace:*",
+    "@harness/model": "workspace:*",
+    "@harness/events": "workspace:*",
+    "@harness/profile": "workspace:*",
+    "@harness/permissions": "workspace:*",
+    "@harness/tools": "workspace:*",
+    "@harness/context": "workspace:*",
+    "@harness/registry-client": "workspace:*",
+    "@harness/mcp": "workspace:*",
+    "@harness/skills": "workspace:*",
+    "ink": "^5.2.0",
+    "react": "^18.3.1"
+  },
   "devDependencies": {
     "@modelcontextprotocol/server-everything": "^2026.8.18",
     "@types/node": "^26.2.0",
+    "@types/react": "^18.3.0",
     "typescript": "^5.5.4"
   }
 }
