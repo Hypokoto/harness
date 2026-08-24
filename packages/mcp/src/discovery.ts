@@ -35,7 +35,15 @@ export class McpServerManager {
       
       const mcpTools = await client.listTools();
       
+      if (!Array.isArray(mcpTools)) {
+         throw new Error(`MCP plugin ${config.name} returned invalid tools list (expected array)`);
+      }
+      
       for (const mcpTool of mcpTools) {
+        if (!mcpTool || typeof mcpTool !== 'object') {
+           throw new Error(`MCP plugin ${config.name} returned invalid tool metadata`);
+        }
+      
         // Merge explicit config capabilities with manifest capabilities
         const { parseCapability } = await import('@harness/permissions');
         

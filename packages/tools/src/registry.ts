@@ -74,6 +74,23 @@ export class ToolRegistry {
     return tool;
   }
 
+  public unregister(name: string): void {
+    if (!this.tools.has(name)) {
+      throw new UnknownToolError(name);
+    }
+    this.tools.delete(name);
+  }
+
+  public replace(name: string, tool: Tool<any, any>): void {
+    if (!this.tools.has(name)) {
+      throw new UnknownToolError(name);
+    }
+    if (tool.name !== name) {
+      throw new InvalidInputError(`Cannot replace tool "${name}" with tool named "${tool.name}"`);
+    }
+    this.tools.set(name, tool);
+  }
+
   public has(name: string): boolean {
     return this.tools.has(name);
   }
@@ -99,9 +116,9 @@ export class ToolRegistry {
     // must pass this check. The tool is NEVER called if the check fails.
     const requiredRaw = tool.requiredCapabilities ?? [];
     const required: Capability[] = requiredRaw.map(parseCapability);
-    const granted = this.getGrantedSet();
+    let granted = this.getGrantedSet();
 
-    const decision: PermissionDecision = this.policy.check({
+    let decision: PermissionDecision = this.policy.check({
       toolName: name,
       requiredCapabilities: required,
       grantedCapabilities: granted,
@@ -129,6 +146,24 @@ export class ToolRegistry {
       requiredCapabilities: required,
       missingCapabilities: [],
     });
+
+    // ── TOCTOU RE-VALIDATION (Phase 10) ───────────────────────────────────────
+    // Because emitPermissionEvent is asynchronous, the registry state or policy
+    // may have mutated while we were yielding to the event loop.
+    const currentTool = this.tools.get(name);
+    if (currentTool !== tool) {
+      throw new ToolExecutionError(`Tool "${name}" was replaced or unregistered during authorization`, { toolName: name });
+    }
+
+    granted = this.getGrantedSet();
+    decision = this.policy.check({
+      toolName: name,
+      requiredCapabilities: required,
+      grantedCapabilities: granted,
+    });
+    if (!decision.allowed) {
+       throw new PermissionDeniedError(name, decision.missingCapabilities ?? required);
+    }
     // ── END PERMISSION ENFORCEMENT ────────────────────────────────────────────
 
     let validatedInput = input;
