@@ -10,7 +10,7 @@ export function parseCapability(raw: unknown): Capability {
     throw new TypeError('Capability must be a non-empty string.');
   }
 
-  const trimmed = raw.trim();
+  const trimmed = raw.trim().toLowerCase();
   const parts = trimmed.split('.');
 
   if (parts.length < 2 || parts.some((part) => !part.trim())) {

@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "test": "node --test dist/context.test.js",
+    "test": "node --test dist/*.test.js",
     "clean": "tsc -b --clean"
   },
   "dependencies": {

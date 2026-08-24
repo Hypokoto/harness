@@ -21,12 +21,25 @@ export class ToolIndex {
   }
 
   public addTool(tool: Tool): void {
+    if (this.toolMap.has(tool.name)) {
+      throw new Error(`Duplicate tool name: ${tool.name}`);
+    }
+    
+    if (tool.inputSchema !== undefined && (typeof tool.inputSchema !== 'object' || tool.inputSchema === null)) {
+      throw new Error(`Invalid inputSchema for tool ${tool.name}`);
+    }
+
     this.toolMap.set(tool.name, tool);
     this.entries.set(tool.name, {
       name: tool.name,
       description: tool.description,
       inputSchema: tool.inputSchema as Record<string, unknown> | undefined,
     });
+  }
+
+  public removeTool(name: string): void {
+    this.toolMap.delete(name);
+    this.entries.delete(name);
   }
 
   public getTool(name: string): Tool | undefined {
