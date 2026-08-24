@@ -38,6 +38,7 @@
     { "path": "./packages/memory" },
     { "path": "./packages/subagents" },
     { "path": "./packages/isolation-lite" },
+    { "path": "./packages/sandbox" },
     { "path": "./cli" }
   ],
   "files": []

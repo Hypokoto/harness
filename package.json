@@ -30,6 +30,7 @@
     "@harness/registry-client": "workspace:*",
     "@harness/mcp": "workspace:*",
     "@harness/skills": "workspace:*",
+    "@harness/sandbox": "workspace:*",
     "ink": "^5.2.0",
     "react": "^18.3.1"
   },

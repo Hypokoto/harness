@@ -1,0 +1,21 @@
+{
+  "name": "@harness/sandbox",
+  "version": "0.0.0-phase3",
+  "description": "Sandbox package - Out of process plugin execution",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./worker": "./dist/worker.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "node --test dist/sandbox.test.js dist/adversarial.test.js dist/adversarial-crashes.test.js dist/adversarial-env.test.js",
+    "clean": "tsc -b --clean"
+  },
+  "dependencies": {
+    "@harness/kernel": "workspace:*",
+    "@harness/tools": "workspace:*"
+  }
+}

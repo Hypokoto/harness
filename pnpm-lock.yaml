@@ -35,6 +35,9 @@ importers:
       '@harness/registry-client':
         specifier: workspace:*
         version: link:packages/registry-client
+      '@harness/sandbox':
+        specifier: workspace:*
+        version: link:packages/sandbox
       '@harness/skills':
         specifier: workspace:*
         version: link:packages/skills
@@ -202,6 +205,15 @@ importers:
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
+
+  packages/sandbox:
+    dependencies:
+      '@harness/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@harness/tools':
+        specifier: workspace:*
+        version: link:../tools
 
   packages/skills:
     dependencies:
