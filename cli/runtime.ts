@@ -106,6 +106,19 @@ export class HarnessRuntime {
     this.kernel.registerPlugin(this.createToolsPlugin());
     this.kernel.registerPlugin(this.createAgentPlugin());
 
+    // Register third-party plugins in a sandbox
+    const plugins = this.config.profile.config.plugins || [];
+    for (const pluginName of plugins) {
+      // In a real implementation, we would resolve the absolute path to the plugin.
+      // For now, we assume it's resolvable by Node.
+      try {
+        const { createSandboxedPlugin } = await import('@harness/sandbox');
+        this.kernel.registerPlugin(createSandboxedPlugin(pluginName, pluginName));
+      } catch (err) {
+        console.warn(`Failed to register sandboxed plugin ${pluginName}:`, err);
+      }
+    }
+
     // Start the kernel (runs setup → start in dependency order)
     await this.kernel.start();
 
@@ -317,12 +330,7 @@ export class HarnessRuntime {
       return this.currentSession;
     }
 
-    const session = new Session({
-      id: sessionId,
-      systemPrompt: this.config.profile.config.systemPrompt,
-      model: this.config.modelName,
-      eventStore: this.eventStore ?? undefined,
-    });
+    const initialMessages: import('@harness/model').ModelMessage[] = [];
 
     // If resuming, replay events from EventStore
     if (sessionId && this.eventStore) {
@@ -331,7 +339,7 @@ export class HarnessRuntime {
         for (const event of events) {
           const payload = event.payload as Record<string, unknown>;
           if (event.type === 'message_added' && payload.role && payload.content) {
-            session.addMessage({
+            initialMessages.push({
               role: payload.role as 'user' | 'assistant',
               content: payload.content as string,
             });
@@ -341,6 +349,14 @@ export class HarnessRuntime {
         // Session not found or corrupted — start fresh
       }
     }
+
+    const session = new Session({
+      id: sessionId,
+      systemPrompt: this.config.profile.config.systemPrompt,
+      model: this.config.modelName,
+      eventStore: this.eventStore ?? undefined,
+      initialMessages,
+    });
 
     this.currentSession = session;
     return session;

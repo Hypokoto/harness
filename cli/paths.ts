@@ -133,6 +133,11 @@ export function discoverProject(startDir?: string): ProjectDiscovery {
       break;
     }
 
+    // Stop traversal if we hit a known project boundary
+    if (existsSync(path.join(currDir, '.git')) || existsSync(path.join(currDir, 'package.json'))) {
+      break;
+    }
+
     const parent = path.dirname(currDir);
     if (parent === currDir) break;
     currDir = parent;

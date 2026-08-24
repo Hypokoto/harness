@@ -52,7 +52,9 @@ export class ProfileResolver {
 
     // Deep merge all layers
     const mergedConfig = deepMergeProfiles(layers);
-    const finalName = options.profileName ?? mergedConfig.name ?? 'default';
+    
+    // Explicitly defined name in config wins, otherwise the requested profile name, otherwise 'default'
+    const finalName = mergedConfig.name ?? options.profileName ?? 'default';
     mergedConfig.name = finalName;
 
     return {

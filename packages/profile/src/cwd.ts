@@ -10,6 +10,11 @@ export function findProjectConfig(startDir?: string): string | null {
       return candidate;
     }
 
+    // Stop traversal if we hit a known project boundary
+    if (existsSync(join(currDir, '.git')) || existsSync(join(currDir, 'package.json'))) {
+      break;
+    }
+
     const parent = dirname(currDir);
     if (parent === currDir) {
       break;
