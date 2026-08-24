@@ -129,10 +129,16 @@ export class FakeModel implements Model {
     } else if (Array.isArray(resp)) {
       content = resp;
       const textBlocks = content.filter((b): b is { type: 'text'; text: string } => b.type === 'text');
-      text = textBlocks.map((b) => b.text).join('\n');
-      if (content.some((b) => b.type === 'tool_use')) {
+      let combinedText = textBlocks.map((b) => b.text).join('\n');
+      
+      const toolBlocks = content.filter((b): b is any => b.type === 'tool_use');
+      if (toolBlocks.length > 0) {
         stopReason = 'tool_use';
+        const toolStr = toolBlocks.map(t => JSON.stringify({ tool: t.name, input: t.input })).join('\n');
+        combinedText = combinedText ? combinedText + '\n' + toolStr : toolStr;
       }
+      
+      text = combinedText;
     } else {
       content = [{ type: 'text', text: String(resp) }];
       text = String(resp);

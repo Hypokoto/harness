@@ -254,8 +254,8 @@ test('TEST 12: AgentLoop logs event envelopes to EventStore', async () => {
     const types = events.map((e) => e.type);
     assert.ok(types.includes('agent_turn_started'));
     assert.ok(types.includes('agent_turn_completed'));
-    assert.ok(types.includes('tool_call_requested'));
-    assert.ok(types.includes('tool_call_completed'));
+    assert.ok(types.includes('tool.called'));
+    assert.ok(types.includes('tool.completed'));
   } finally {
     rmSync(tmpDir, { recursive: true, force: true });
   }

@@ -46,10 +46,10 @@ test('TEST 21: AgentLoop cannot execute an unauthorized tool', async () => {
   assert.ok(!toolExecuted, 'tool.execute() must NOT be called through AgentLoop without permission');
 
   const messages = session.getMessages();
-  const lastToolResultMsg = messages.find(m => m.role === 'user' && Array.isArray(m.content) && m.content.some(b => b.type === 'tool_result' && b.toolUseId === 'call_security_test'));
+  const lastToolResultMsg = messages.find(m => m.role === 'user' && Array.isArray(m.content) && m.content.some(b => b.type === 'tool_result' && b.isError === true));
   assert.ok(lastToolResultMsg);
-  const resultBlock = (lastToolResultMsg.content as any[]).find(b => b.type === 'tool_result' && b.toolUseId === 'call_security_test');
-  console.log('BLOCK CONTENT:', resultBlock.content);  assert.ok(typeof resultBlock.content === 'string' && resultBlock.content.includes('Permission denied'));
+  const resultBlock = (lastToolResultMsg.content as any[]).find(b => b.type === 'tool_result' && b.isError === true);
+  assert.ok(typeof resultBlock.content === 'string' && resultBlock.content.includes('Permission denied'));
 });
 
 test('TEST 25: Existing Phase 5 agent tests still pass (regression)', async () => {
